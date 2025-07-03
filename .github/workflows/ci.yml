@@ -17,6 +17,6 @@ jobs:
         with:
           rust-version: stable
       - name: Build
-        run: cargo build --release
+        run: cargo build --release --locked
       - name: Run main
-        run: cargo run --release
+        run: cargo run --release --locked
