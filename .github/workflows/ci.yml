@@ -20,4 +20,4 @@ jobs:
       - name: Build
         run: cargo build --release --locked
       - name: Run main
-        run: cargo run --release --locked
+        run: cargo run --release --locked -- --work 0 --break 0 --alert # run with zero durations to test functionality
