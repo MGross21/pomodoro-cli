@@ -1,5 +1,7 @@
 # Pomodoro Timer
 
+![Pomodoro Terminal](assets/videos/usage.gif)
+
 ## Building the Project
 
 Navigate to project directory and run:
@@ -26,8 +28,7 @@ The tool will be found in:
 ~/.cargo/bin/
 ```
 
-*Make sure its on your $PATH*
-
+*Make sure its on your `$PATH`*
 
 ## Aliasing
 

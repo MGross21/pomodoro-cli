@@ -6,6 +6,7 @@ use std::thread::sleep;
 #[derive(Parser)]
 #[command(name = "Pomodoro CLI")]
 #[command(about = "A simple CLI Pomodoro timer with a progress bar. Let's get productive!")]
+#[command(version)]
 struct Args {
     /// Work duration in minutes
     #[arg(short, long, default_value_t = 25)]
@@ -32,9 +33,9 @@ fn main() {
     let args = Args::parse();
     let total_secs = args.work * 60;
     let work_style = ProgressStyle::with_template(
-        "[{elapsed_precise}] [{bar:40.cyan/blue}] {percent}%",
+        "[{elapsed_precise}] [{bar:40.cyan/white}] {percent}%",
     ).unwrap()
-    .progress_chars("##-");
+    .progress_chars("⣿⣿⣤");
     disp_progress_bar(
         total_secs,
         work_style,
@@ -49,7 +50,7 @@ fn main() {
     let break_style = ProgressStyle::with_template(
         "[{elapsed_precise}] [{bar:40.green/white}] {percent}% (Break)",
     ).unwrap()
-    .progress_chars("##-");
+    .progress_chars("⣿⣿⣤");
     disp_progress_bar(
         break_secs,
         break_style,
