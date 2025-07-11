@@ -17,6 +17,8 @@ Options:
 
 ## Installation
 
+<sub>Installing Rust package manager, `cargo`: [See Here](https://doc.rust-lang.org/cargo/getting-started/installation.html)</sub>
+
 Clone the repository and build manually:
 
 ```bash
