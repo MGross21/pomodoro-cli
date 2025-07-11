@@ -4,7 +4,7 @@
 
 ## Usage
 
-```bash
+```console
 Usage: pomodoro [OPTIONS]
 
 Options:
