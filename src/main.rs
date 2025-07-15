@@ -1,7 +1,9 @@
 use clap::Parser;
+use crossterm::{execute, terminal::{Clear, ClearType}};
 use indicatif::{ProgressBar, ProgressStyle};
 use std::time::Duration;
 use std::thread::sleep;
+use std::io::{stdout};
 
 #[derive(Parser)]
 #[command(name = "Pomodoro CLI")]
@@ -30,6 +32,8 @@ fn disp_progress_bar(total_secs: u64, style: ProgressStyle, finish_message: Stri
 }
 
 fn main() {
+    execute!(stdout(), Clear(ClearType::All), crossterm::cursor::MoveTo(0, 0)).unwrap(); // Clear the terminal screen and move cursor to top-left
+
     let args = Args::parse();
     let total_secs = args.work * 60;
     let work_style = ProgressStyle::with_template(
