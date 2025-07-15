@@ -8,11 +8,11 @@
 Usage: pomodoro [OPTIONS]
 
 Options:
-    -w, --work  <WORK>   Work duration in minutes [default: 25]
-    -b, --break <BREAK>  Break duration in minutes [default: 5]
-        --alert          Enable alert sound after each timer (if supported)
-    -h, --help           Print help
-    -V, --version        Print version
+  -w, --work <WORK>    Work duration (e.g. 25m, 1h, 90s, or just 25 for minutes) [default: 25]
+  -b, --break <BREAK>  Break duration (e.g. 5m, 30s, or just 5 for minutes) [default: 5]
+      --alert          Enable alert sound after each timer (if supported by terminal)
+  -h, --help           Print help
+  -V, --version        Print version
 ```
 
 ## Installation
