@@ -11,7 +11,6 @@ jobs:
     permissions:
       contents: write
       pages: write
-      id-token: write
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -25,28 +24,10 @@ jobs:
     - name: Build
       run: cargo build --release --locked
 
-    - name: Test run
-      run: cargo run --release --locked -- --work 0 --break 0 --alert
-
-    - name: Prepare deployment
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: |
-        mkdir -p deploy
-        cp target/release/pomodoro deploy/p
-        cat > deploy/r << 'EOF'
-        #!/bin/bash
-        set -e
-        TEMP_DIR=$(mktemp -d)
-        trap "rm -rf $TEMP_DIR" EXIT
-        curl -sSL https://mgross21.github.io/pomodoro-cli/p -o "$TEMP_DIR/p"
-        chmod +x "$TEMP_DIR/p"
-        exec "$TEMP_DIR/p" "$@"
-        EOF
-
     - name: Deploy to GitHub Pages
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./deploy
+        publish_dir: ./target/release
         force_orphan: true
