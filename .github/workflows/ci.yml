@@ -42,21 +42,21 @@ jobs:
     - name: Prepare deployment directory
       run: |
         mkdir -p deploy
-        cp target/release/pomodoro-cli deploy/pomodoro
+        cp target/release/pomodoro deploy/p
         
         # Create a shell script wrapper for direct execution
-        cat > deploy/run << 'EOF'
+        cat > deploy/r << 'EOF'
         #!/bin/bash
         set -e
         TEMP_DIR=$(mktemp -d)
         trap "rm -rf $TEMP_DIR" EXIT
-        curl -sSL https://mgross21.github.io/pomodoro-cli/pomodoro -o "$TEMP_DIR/pomodoro"
-        chmod +x "$TEMP_DIR/pomodoro"
-        exec "$TEMP_DIR/pomodoro" "$@"
+        curl -sSL https://mgross21.github.io/pomodoro-cli/p -o "$TEMP_DIR/p"
+        chmod +x "$TEMP_DIR/p"
+        exec "$TEMP_DIR/p" "$@"
         EOF
     
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v4
+      uses: peaceiris/actions-gh-pages@v9
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./deploy
