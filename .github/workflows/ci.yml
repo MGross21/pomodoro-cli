@@ -1,5 +1,4 @@
 name: CI
-
 on:
   push:
     branches: [ main ]
@@ -10,14 +9,55 @@ jobs:
   build-and-run:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Set up Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-      - name: Build
-        run: cargo build --release --locked
-      - name: Run main
-        run: cargo run --release --locked -- --work 0 --break 0 --alert # run with zero durations to test functionality
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Rust
+      uses: dtolnay/rust-toolchain@stable
+    
+    - name: Build
+      run: cargo build --release --locked
+    
+    - name: Run main
+      run: cargo run --release --locked -- --work 0 --break 0 --alert # run with zero durations to test functionality
+
+  deploy-binary:
+    runs-on: ubuntu-latest
+    needs: build-and-run  # Only deploy if build-and-run succeeds
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'  # Only deploy on main branch pushes
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Rust
+      uses: dtolnay/rust-toolchain@stable
+    
+    - name: Build release binary
+      run: cargo build --release --locked
+    
+    - name: Prepare deployment directory
+      run: |
+        mkdir -p deploy
+        cp target/release/pomodoro-cli deploy/pomodoro
+        
+        # Create a shell script wrapper for direct execution
+        cat > deploy/run << 'EOF'
+        #!/bin/bash
+        set -e
+        TEMP_DIR=$(mktemp -d)
+        trap "rm -rf $TEMP_DIR" EXIT
+        curl -sSL https://mgross21.github.io/pomodoro-cli/pomodoro -o "$TEMP_DIR/pomodoro"
+        chmod +x "$TEMP_DIR/pomodoro"
+        exec "$TEMP_DIR/pomodoro" "$@"
+        EOF
+    
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./deploy
+        force_orphan: true  # Force push to gh-pages branch

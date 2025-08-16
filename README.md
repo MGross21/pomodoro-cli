@@ -15,34 +15,22 @@ Options:
   -V, --version        Print version
 ```
 
-## Installation
-
-<sub>Installing Rust package manager, `cargo`: [See Here](https://doc.rust-lang.org/cargo/getting-started/installation.html)</sub>
-
-Clone the repository and build manually:
+### Quick Start
 
 ```bash
-git clone https://github.com/MGross21/pomodoro-cli
-cd pomodoro-cli
-cargo build --release
+curl -sSL https://mgross21.github.io/pomodoro-cli/run | bash -s -- [OPTIONS]
 ```
 
-The compiled binary will be at:
+### Alias Setup
+
+Add this to your shell config (e.g., `~/.bashrc` or `~/.zshrc`):
 
 ```bash
-./target/release/pomodoro-cli
+alias pomodoro='curl -sSL https://mgross21.github.io/pomodoro-cli/run | bash -s --'
 ```
 
-Or install directly with Cargo:
+Use the alias:
 
 ```bash
-cargo install --path .
+pomodoro --work 25 --break 5 --alert
 ```
-
-The installed binary will be in:
-
-```bash
-~/.cargo/bin/
-```
-
-*Ensure this directory is in your `$PATH`.*
