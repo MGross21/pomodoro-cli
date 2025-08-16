@@ -24,10 +24,24 @@ jobs:
     - name: Build
       run: cargo build --release --locked
 
-    - name: Clean Deploy
+    - name: Prepare Deploy Directory
+      run: mkdir -p ./target/deploy
+
+    - name: Move Binary
+      run: mv ./target/release/pomodoro ./target/deploy/p
+
+    - name: Create Runner Script
       run: |
-        mkdir -p ./target/deploy
-        mv ./target/release/pomodoro ./target/deploy/p
+        cat > ./target/deploy/r << 'EOF'
+        #!/bin/bash
+        set -e
+        TEMP_DIR=$(mktemp -d)
+        trap "rm -rf $TEMP_DIR" EXIT
+
+        curl -fsSL mgross21.github.io/pomodoro-cli/p -o "$TEMP_DIR/p"
+        chmod +x "$TEMP_DIR/p"
+        exec "$TEMP_DIR/p" "$@"
+        EOF
 
     - name: Deploy to GitHub Pages
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
