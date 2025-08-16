@@ -28,19 +28,19 @@ jobs:
       run: mkdir -p ./target/deploy
 
     - name: Move Binary
-      run: mv ./target/release/pomodoro ./target/deploy/p
+      run: mv ./target/release/pomodoro ./target/deploy/pomodoro
 
     - name: Create Runner Script
       run: |
-        cat > ./target/deploy/r << 'EOF'
+        cat > ./target/deploy/run << 'EOF'
         #!/bin/bash
         set -e
         TEMP_DIR=$(mktemp -d)
         trap "rm -rf $TEMP_DIR" EXIT
 
-        curl -fsSL mgross21.github.io/pomodoro-cli/p -o "$TEMP_DIR/p"
-        chmod +x "$TEMP_DIR/p"
-        exec "$TEMP_DIR/p" "$@"
+        curl -fsSL mgross21.github.io/pomodoro-cli/pomodoro -o "$TEMP_DIR/pomodoro"
+        chmod +x "$TEMP_DIR/pomodoro"
+        exec "$TEMP_DIR/pomodoro" "$@"
         EOF
 
     - name: Deploy to GitHub Pages
