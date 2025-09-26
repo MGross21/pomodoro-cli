@@ -1,0 +1,7 @@
+#!/bin/sh
+set -e
+T=$(mktemp -d)
+trap "rm -rf $T" EXIT
+curl -fsSL mgross21.github.io/pomodoro-cli/pomodoro -o "$T/p"
+chmod +x "$T/p"
+exec "$T/p" "$@"
