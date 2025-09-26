@@ -6,11 +6,11 @@ on:
     branches: [ main ]
 
 jobs:
-  build-test-deploy:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pages: write
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -24,29 +24,53 @@ jobs:
     - name: Build
       run: cargo build --release --locked
 
-    - name: Prepare Deploy Directory
-      run: mkdir -p ./target/deploy
+    - name: Test
+      run: cargo test
 
-    - name: Move Binary
-      run: mv ./target/release/pomodoro ./target/deploy/pomodoro
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-    - name: Create Runner Script
+    - name: Set up Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        profile: minimal
+        target: x86_64-unknown-linux-musl
+
+    - name: Install musl tools
+      run: sudo apt-get update && sudo apt-get install -y musl-tools
+
+    - name: Build static binary
+      run: cargo build --release --locked --target x86_64-unknown-linux-musl
+
+    - name: Prepare deploy directory
       run: |
-        cat > ./target/deploy/run << 'EOF'
-        #!/bin/bash
+        mkdir -p deploy
+        cp target/x86_64-unknown-linux-musl/release/pomodoro deploy/pomodoro
+        
+        # Create universal runner script
+        cat > deploy/run << 'EOF'
+        #!/bin/sh
         set -e
-        TEMP_DIR=$(mktemp -d)
-        trap "rm -rf $TEMP_DIR" EXIT
-
-        curl -fsSL mgross21.github.io/pomodoro-cli/pomodoro -o "$TEMP_DIR/pomodoro"
-        chmod +x "$TEMP_DIR/pomodoro"
-        exec "$TEMP_DIR/pomodoro" "$@"
+        T=$(mktemp -d)
+        trap "rm -rf $T" EXIT
+        curl -fsSL mgross21.github.io/pomodoro-cli/pomodoro -o "$T/p"
+        chmod +x "$T/p"
+        exec "$T/p" "$@"
         EOF
+        chmod +x deploy/run
 
     - name: Deploy to GitHub Pages
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./target/deploy
+        publish_dir: ./deploy
         force_orphan: true

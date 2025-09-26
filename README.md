@@ -18,7 +18,7 @@ Options:
 ### Quick Start
 
 ```bash
-curl -sSL https://mgross21.github.io/pomodoro-cli/run | bash -s -- [OPTIONS]
+curl -sSL mgross21.github.io/pomodoro-cli/run|sh -s -- [OPTIONS]
 ```
 
 ### Remote Alias Setup
@@ -26,7 +26,7 @@ curl -sSL https://mgross21.github.io/pomodoro-cli/run | bash -s -- [OPTIONS]
 Add this to your shell config (e.g., `~/.bashrc` or `~/.zshrc`):
 
 ```bash
-alias pomodoro='curl -sSL https://mgross21.github.io/pomodoro-cli/run | bash -s --'
+alias pomodoro='curl -sSL mgross21.github.io/pomodoro-cli/run|sh -s --'
 ```
 
 Use the alias:
