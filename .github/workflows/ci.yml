@@ -45,27 +45,38 @@ jobs:
         profile: minimal
         override: true
 
-    - name: Add musl target
-      run: rustup target add x86_64-unknown-linux-musl
+    - name: Add targets
+      run: |
+        rustup target add x86_64-unknown-linux-musl
+        rustup target add aarch64-apple-darwin
 
-    - name: Install musl tools
-      run: sudo apt-get update && sudo apt-get install -y musl-tools
+    - name: Install tools
+      run: |
+        sudo apt-get update && sudo apt-get install -y musl-tools
+        cargo install cross --git https://github.com/cross-rs/cross
 
-    - name: Build static binary
-      run: cargo build --release --locked --target x86_64-unknown-linux-musl
+    - name: Build binaries
+      run: |
+        cargo build --release --locked --target x86_64-unknown-linux-musl
+        cross build --release --locked --target aarch64-apple-darwin
 
     - name: Prepare deploy directory
       run: |
         mkdir -p deploy
         cp target/x86_64-unknown-linux-musl/release/pomodoro deploy/pomodoro
+        cp target/aarch64-apple-darwin/release/pomodoro deploy/pomodoro-arm
         
-        # Create universal runner script
+        # Universal runner script with ARM Mac detection
         cat > deploy/run << 'EOF'
         #!/bin/sh
         set -e
         T=$(mktemp -d)
         trap "rm -rf $T" EXIT
-        curl -fsSL mgross21.github.io/pomodoro-cli/pomodoro -o "$T/p"
+        if [ "$(uname)" = "Darwin" ] && [ "$(uname -m)" = "arm64" ]; then
+          curl -fsSL mgross21.github.io/pomodoro-cli/pomodoro-arm -o "$T/p"
+        else
+          curl -fsSL mgross21.github.io/pomodoro-cli/pomodoro -o "$T/p"
+        fi
         chmod +x "$T/p"
         exec "$T/p" "$@"
         EOF

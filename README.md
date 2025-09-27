@@ -1,6 +1,12 @@
 # Pomodoro Timer
 
-![Pomodoro Terminal](assets/videos/usage.gif)
+<div align="center">
+  <img src="https://raw.githubusercontent.com/mgross21/pomodoro-cli/main/assets/videos/usage.gif" alt="Pomodoro Terminal" />
+  <br/>
+  <a href="https://github.com/mgross21/pomodoro-cli/actions/workflows/ci.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/mgross21/pomodoro-cli/ci.yml?branch=main&color=%239c6ade" alt="CI">
+  </a>
+</div>
 
 ## Usage
 
