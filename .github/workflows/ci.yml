@@ -27,13 +27,19 @@ jobs:
     - name: Test
       run: cargo test
 
-  deploy:
+  build-binaries:
     needs: test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pages: write
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            name: pomodoro
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            name: pomodoro-arm
+    runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -43,28 +49,40 @@ jobs:
       with:
         toolchain: stable
         profile: minimal
+        target: ${{ matrix.target }}
         override: true
 
-    - name: Add targets
-      run: |
-        rustup target add x86_64-unknown-linux-musl
-        rustup target add aarch64-apple-darwin
+    - name: Install musl tools (Linux only)
+      if: matrix.os == 'ubuntu-latest'
+      run: sudo apt-get update && sudo apt-get install -y musl-tools
 
-    - name: Install tools
-      run: |
-        sudo apt-get update && sudo apt-get install -y musl-tools
-        cargo install cross --git https://github.com/cross-rs/cross
+    - name: Build binary
+      run: cargo build --release --locked --target ${{ matrix.target }}
 
-    - name: Build binaries
-      run: |
-        cargo build --release --locked --target x86_64-unknown-linux-musl
-        cross build --release --locked --target aarch64-apple-darwin
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.name }}
+        path: target/${{ matrix.target }}/release/pomodoro
+
+  deploy:
+    needs: build-binaries
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
 
     - name: Prepare deploy directory
       run: |
         mkdir -p deploy
-        cp target/x86_64-unknown-linux-musl/release/pomodoro deploy/pomodoro
-        cp target/aarch64-apple-darwin/release/pomodoro deploy/pomodoro-arm
+        cp pomodoro/pomodoro deploy/pomodoro
+        cp pomodoro-arm/pomodoro deploy/pomodoro-arm
         
         # Universal runner script with ARM Mac detection
         cat > deploy/run << 'EOF'
