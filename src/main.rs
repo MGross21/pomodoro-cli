@@ -18,6 +18,9 @@ struct Args {
     /// Enable alert sound after each timer (if supported by terminal)
     #[arg(long, default_value_t = false)]
     alert: bool,
+    /// Number of work/break cycles to run (default: 1)
+    #[arg(short, long, default_value_t = 1)]
+    cycles: u32,
 }
 
 fn parse_human_duration(input: &str) -> Result<Duration, String> {
@@ -29,24 +32,24 @@ fn parse_human_duration(input: &str) -> Result<Duration, String> {
 fn run_timer(secs: u64, style: &ProgressStyle, finish_message: String, alert: bool) {
     let pb = ProgressBar::new(secs);
     pb.set_style(style.clone());
-    for _ in 0..secs {
-        pb.inc(1);
+    pb.enable_steady_tick(Duration::from_millis(100));
+    
+    for i in 1..=secs {
         sleep(Duration::from_secs(1));
+        pb.set_position(i);
     }
     pb.finish_with_message(finish_message);
     if alert {
         print!("\x07");
+        let _ = std::io::Write::flush(&mut std::io::stdout());
     }
 }
 
 fn parse_secs(input: &str, which: &str) -> u64 {
-    match parse_human_duration(input) {
-        Ok(dur) => dur.as_secs(),
-        Err(e) => {
-            eprintln!("Error parsing {}: {}", which, e);
-            std::process::exit(1);
-        }
-    }
+    parse_human_duration(input).unwrap_or_else(|e| {
+        eprintln!("Error parsing {}: {}", which, e);
+        std::process::exit(1);
+    }).as_secs()
 }
 
 fn main() {
@@ -63,16 +66,29 @@ fn main() {
         "[{elapsed_precise}] [{bar:40.green/white}] {percent}% (Break)",
     ).unwrap().progress_chars("⣿⣿⣤");
 
-    run_timer(
-        work_secs,
-        &work_style,
-        format!("Pomodoro done! Take a {} break.", &args.break_l),
-        args.alert,
-    );
-    run_timer(
-        break_secs,
-        &break_style,
-        "Break finished! Ready for another Pomodoro?".to_string(),
-        args.alert,
-    );
+    for cycle in 1..=args.cycles {
+        if args.cycles > 1 {
+            println!("Cycle {}/{}", cycle, args.cycles);
+        }
+        
+        run_timer(
+            work_secs,
+            &work_style,
+            format!("Pomodoro done! Take a {} break.", &args.break_l),
+            args.alert,
+        );
+        
+        if cycle < args.cycles {
+            run_timer(
+                break_secs,
+                &break_style,
+                "Break finished! Ready for another Pomodoro?".to_string(),
+                args.alert,
+            );
+        }
+    }
+    
+    if args.cycles > 1 {
+        println!("All {} cycles completed!", args.cycles);
+    }
 }
