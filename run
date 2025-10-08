@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+T=$(mktemp -d)
+trap "rm -rf $T" EXIT
+if [ "$(uname)" = "Darwin" ] && [ "$(uname -m)" = "arm64" ]; then
+  curl -fsSL mgross21.github.io/pomodoro-cli/pomodoro-arm -o "$T/p"
+else
+  curl -fsSL mgross21.github.io/pomodoro-cli/pomodoro -o "$T/p"
+fi
+chmod +x "$T/p"
+exec "$T/p" "$@"
