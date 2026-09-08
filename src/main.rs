@@ -8,7 +8,6 @@ use humantime::parse_duration;
 #[command(name = "Pomodoro Timer")]
 #[command(about = "A simple CLI Pomodoro timer with a progress bar. Let's get productive!")]
 #[command(version = env!("CARGO_PKG_VERSION"))]
-#[command(disable_version_flag = true)]
 struct Args {
     /// Work duration (e.g. 25m, 1h, 90s, or just 25 for minutes)
     #[arg(short, long, default_value = "25")]
@@ -22,9 +21,6 @@ struct Args {
     /// Number of work/break cycles to run (default: 1)
     #[arg(short, long, default_value_t = 1)]
     cycles: u32,
-    /// Print version
-    #[arg(short = 'v', long = "version", action = clap::ArgAction::Version)]
-    version: bool,
 }
 
 fn parse_human_duration(input: &str) -> Result<Duration, String> {
